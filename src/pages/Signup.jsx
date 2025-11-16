@@ -5,10 +5,9 @@ import { authAPI } from '../services/api';
 
 const Signup = () => {
   const { user } = useAuth();
-  
-  if (user) {
-    return <Navigate to="/dashboard" replace />;
-  }
+  const navigate = useNavigate();
+
+  // Hooks must be at the top
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -17,7 +16,11 @@ const Signup = () => {
   });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const navigate = useNavigate();
+
+  // Now conditional return is okay
+  if (user) {
+    return <Navigate to="/dashboard" replace />;
+  }
 
   const handleChange = (e) => {
     setFormData({
@@ -56,10 +59,11 @@ const Signup = () => {
       });
       navigate('/login');
     } catch (err) {
-      const errorMessage = err.response?.data?.message || 
-                          err.response?.data?.detail || 
-                          err.message || 
-                          'Signup failed. Please try again.';
+      const errorMessage =
+        err.response?.data?.message ||
+        err.response?.data?.detail ||
+        err.message ||
+        'Signup failed. Please try again.';
       setError(errorMessage);
     } finally {
       setLoading(false);
