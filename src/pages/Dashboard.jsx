@@ -27,97 +27,25 @@ const Dashboard = () => {
     images: null,
   });
 
-const fetchTasks = async () => {
-  setLoading(true);
-  try {
-    const params = {
-      page,
-      per_page: 5,
-      ...(statusFilter && { status: statusFilter }),
-      ...(priorityFilter && { priority: priorityFilter }),
-      ...(search && { search }),
-    };
+  const fetchTasks = async () => {
+    setLoading(true);
+    try {
+      const response = await tasksAPI.getTasks({
+        page,
+        per_page: 1,
+        status: statusFilter,
+        priority: priorityFilter,
+        search,
+      });
 
-    const response = await tasksAPI.getTasks(params);
-    console.debug("tasks API response:", response);
+      const tasksData = response?.data?.tasks || [];
+      setTasks(tasksData);
 
-    let tasks = [];
+      const total_pages_from_api = response?.data?.data?.total_pages || 1;
+      setTotalPages(Number(total_pages_from_api));
 
-    if (response?.data?.data?.tasks) {
-      tasks = response.data.data.tasks;
-    } else if (response?.tasks) {
-      tasks = response.tasks;
-    } else if (response?.data?.tasks) {
-      tasks = response.data.tasks;
-    } else if (Array.isArray(response)) {
-      tasks = response;
-    } else {
-      const arr = Object.values(response).find((v) => Array.isArray(v));
-      if (arr) tasks = arr;
-    }
-
-
-    if (!Array.isArray(tasks)) {
-      console.warn("Tasks not found in response:", response);
-      tasks = [];
-    }
-
-
-      // DATE FILTERS
-      if (startDate) {
-        tasks = tasks.filter(
-          (t) => t.due_date && new Date(t.due_date) >= new Date(startDate)
-        );
-      }
-
-      if (endDate) {
-        tasks = tasks.filter(
-          (t) => t.due_date && new Date(t.due_date) <= new Date(endDate)
-        );
-      }
-
-      // SORTING
-      if (sortBy === "due_asc") {
-        tasks = [...tasks].sort(
-          (a, b) => new Date(a.due_date) - new Date(b.due_date)
-        );
-      }
-
-      if (sortBy === "due_desc") {
-        tasks = [...tasks].sort(
-          (a, b) => new Date(b.due_date) - new Date(a.due_date)
-        );
-      }
-
-      if (sortBy === "priority_high_low") {
-        const order = { HIGH: 3, MEDIUM: 2, LOW: 1 };
-        tasks = [...tasks].sort(
-          (a, b) => order[b.priority] - order[a.priority]
-        );
-      }
-
-      if (sortBy === "priority_low_high") {
-        const order = { HIGH: 3, MEDIUM: 2, LOW: 1 };
-        tasks = [...tasks].sort(
-          (a, b) => order[a.priority] - order[b.priority]
-        );
-      }
-
-      setTasks(tasks);
-
-      // Set total pages
-  
-      const total_pages_from_api =
-  response?.data?.data?.total_pages ||
-  response?.data?.total_pages ||
-  response?.total_pages ||
-  1;
-
-setTotalPages(Number(total_pages_from_api));
-console.log("Total pages:", total_pages_from_api);
-
-
- 
+      console.log("Fetched tasks:", tasksData);
+      console.log("Total pages:", total_pages_from_api);
     } catch (error) {
       console.error("Error fetching tasks:", error);
     } finally {
@@ -135,18 +63,82 @@ console.log("Total pages:", total_pages_from_api);
     }
   };
 
+  // Fetch stats only when needed
   useEffect(() => {
-    fetchTasks();
     fetchStats();
-  }, [page, statusFilter, priorityFilter, startDate, endDate, sortBy]);
+  }, [statusFilter, priorityFilter]);
 
+  // Fetch tasks when filter or sorting changes
   useEffect(() => {
-    const timeoutId = setTimeout(() => {
+    const fetchTasks = async () => {
+      setLoading(true);
+      try {
+        const params = {
+          page,
+          per_page: 2,
+        };
+
+        if (statusFilter) params.status = statusFilter;
+        if (priorityFilter) params.priority = priorityFilter;
+        if (search) params.search = search;
+
+        const response = await tasksAPI.getTasks(params);
+
+        let tasks = response.data?.tasks;
+
+        // ---- FRONTEND DATE FILTERS ----
+        if (startDate) {
+          tasks = tasks.filter((t) => t.due_date && t.due_date >= startDate);
+        }
+        if (endDate) {
+          tasks = tasks.filter((t) => t.due_date && t.due_date <= endDate);
+        }
+
+        // ---- SORTING ----
+        if (sortBy === "due_asc") {
+          tasks = [...tasks].sort(
+            (a, b) => new Date(a.due_date) - new Date(b.due_date)
+          );
+        }
+        if (sortBy === "due_desc") {
+          tasks = [...tasks].sort(
+            (a, b) => new Date(b.due_date) - new Date(a.due_date)
+          );
+        }
+        if (sortBy === "priority_high_low") {
+          const order = { HIGH: 3, MEDIUM: 2, LOW: 1 };
+          tasks = [...tasks].sort(
+            (a, b) => order[b.priority] - order[a.priority]
+          );
+        }
+        if (sortBy === "priority_low_high") {
+          const order = { HIGH: 3, MEDIUM: 2, LOW: 1 };
+          tasks = [...tasks].sort(
+            (a, b) => order[a.priority] - order[b.priority]
+          );
+        }
+
+        setTasks(tasks);
+        console.log(response.data);
+
+        setTotalPages(response.data.total_pages || 1);
+      } catch (error) {
+        console.error("Error fetching tasks:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchTasks();
+  }, [page, statusFilter, priorityFilter, startDate, endDate, sortBy, search]);
+
+  // Debounced search
+  useEffect(() => {
+    const delay = setTimeout(() => {
       setPage(1);
-      fetchTasks();
     }, 500);
 
-    return () => clearTimeout(timeoutId);
+    return () => clearTimeout(delay);
   }, [search]);
 
   const handleCreateTask = async (e) => {
@@ -163,7 +155,7 @@ console.log("Total pages:", total_pages_from_api);
 
       if (newTask.images && newTask.images.length > 0) {
         for (let i = 0; i < newTask.images.length; i++) {
-          formData.append("images", newTask.images[i]); 
+          formData.append("images", newTask.images[i]);
         }
       }
 
@@ -261,7 +253,6 @@ console.log("Total pages:", total_pages_from_api);
             </div>
           </div>
         )}
-
 
         {/* Filters and Search */}
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 mb-8 border border-gray-200 dark:border-gray-700">
@@ -374,39 +365,38 @@ console.log("Total pages:", total_pages_from_api);
           </div>
         ) : (
           <>
-<div className="flex flex-col gap-6 mb-8">
-  {tasks.map((task) => (
-    <TaskCard
-      key={task.task_id ?? task.id}
-      task={task}
-      onUpdate={handleTaskUpdate}
-      onDelete={handleTaskDelete}
-    />
-  ))}
-</div>
+            <div className="flex flex-col gap-6 mb-8">
+              {tasks.map((task) => (
+                <TaskCard
+                  key={task.task_id ?? task.id}
+                  task={task}
+                  onUpdate={handleTaskUpdate}
+                  onDelete={handleTaskDelete}
+                />
+              ))}
+            </div>
 
-            {/* Pagination */}
-            {totalPages > 1 && (
-              <div className="flex justify-center items-center space-x-2">
-                <button
-                  onClick={() => setPage((p) => Math.max(1, p - 1))}
-                  disabled={page === 1}
-                  className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  Previous
-                </button>
-                <span className="px-4 py-2 text-gray-700 dark:text-gray-300">
-                  Page {page} of {totalPages}
-                </span>
-                <button
-                  onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-                  disabled={page === totalPages}
-                  className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  Next
-                </button>
-              </div>
-            )}
+            <div className="flex justify-center items-center space-x-2 mt-4">
+              <button
+                onClick={() => setPage((p) => Math.max(1, p - 1))}
+                disabled={page === 1}
+                className="px-4 py-2 border rounded-lg ..."
+              >
+                Previous
+              </button>
+
+              <span className="px-4 py-2">
+                Page {page} of {totalPages}
+              </span>
+
+              <button
+                onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                disabled={page === totalPages}
+                className="px-4 py-2 border rounded-lg ..."
+              >
+                Next
+              </button>
+            </div>
           </>
         )}
 
