@@ -374,16 +374,16 @@ console.log("Total pages:", total_pages_from_api);
           </div>
         ) : (
           <>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-              {tasks.map((task) => (
-                <TaskCard
-                  key={task.task_id ?? task.id}
-                  task={task}
-                  onUpdate={handleTaskUpdate}
-                  onDelete={handleTaskDelete}
-                />
-              ))}
-            </div>
+<div className="flex flex-col gap-6 mb-8">
+  {tasks.map((task) => (
+    <TaskCard
+      key={task.task_id ?? task.id}
+      task={task}
+      onUpdate={handleTaskUpdate}
+      onDelete={handleTaskDelete}
+    />
+  ))}
+</div>
 
             {/* Pagination */}
             {totalPages > 1 && (

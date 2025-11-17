@@ -53,15 +53,20 @@ const TaskCard = ({ task, onUpdate }) => {
 
   return (
     <div
-      className="bg-white dark:bg-gray-800 rounded-xl shadow-md p-5 cursor-pointer hover:shadow-lg transition"
-      onClick={() => navigate(`/task/${task.task_id}`)}
-    >
-      {/* Title */}
-      <h3 className="text-lg font-semibold">{task.title}</h3>
-      <h3 className="text-sm">{formatDate(task.due_date)}</h3>
+  className="bg-white dark:bg-gray-800 rounded-xl shadow-md p-5 cursor-pointer hover:shadow-lg transition"
+  onClick={() => navigate(`/task/${task.task_id}`)}
+>
+  {/* ROW CONTAINER */}
+  <div className="flex justify-between items-start">
 
-      {/* STATUS + PRIORITY */}
-      <div className="flex gap-2 mt-2">
+    {/* LEFT SECTION */}
+    <div>
+      <h3 className="text-lg font-semibold">{task.title}</h3>
+      <p className="text-sm text-gray-500 dark:text-gray-300">
+        {formatDate(task.due_date)}
+      </p>
+
+        <div className="flex gap-2 mt-3">
         <span
           className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(
             task.status
@@ -78,37 +83,30 @@ const TaskCard = ({ task, onUpdate }) => {
           {task.priority}
         </span>
       </div>
+    </div>
 
-      {/* ICON BUTTONS */}
-      <div className="flex space-x-3 mt-4">
-
-        {/* Mark Completed (only if pending) */}
-        {task.status === "PENDING" && (
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              markCompleted();
-            }}
-            className="p-2 bg-green-500 text-white rounded-full hover:bg-green-600 transition"
-            title="Mark Completed"
-          >
-            <FiCheckCircle size={18} />
-          </button>
-        )}
-
-        {/* View details */}
+    {/* RIGHT SECTION (ICON BUTTONS) */}
+    <div className="flex space-x-3">
+{/* STATUS + PRIORITY */}
+    
+      {/* ✔ Mark Completed (only if pending) */}
+      {task.status === "PENDING" && (
         <button
           onClick={(e) => {
             e.stopPropagation();
-            navigate(`/task/${task.task_id}`);
+            markCompleted();
           }}
-          className="p-2 bg-blue-500 text-white rounded-full hover:bg-blue-600 transition"
-          title="View Details"
+          className="p-2 bg-green-500 text-white rounded-full hover:bg-green-600 transition"
+          title="Mark Completed"
         >
-          <FiEye size={18} />
+          <FiCheckCircle size={18} />
         </button>
-      </div>
+      )}
     </div>
+
+  </div>
+</div>
+
   );
 };
 

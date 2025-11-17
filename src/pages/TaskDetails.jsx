@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { tasksAPI } from "../services/api";
 import { FiEdit2, FiTrash2, FiSave, FiX } from "react-icons/fi";
+import { IoArrowBack } from "react-icons/io5";
 
 const TaskDetails = () => {
   const { id } = useParams();
@@ -52,11 +53,21 @@ const TaskDetails = () => {
   if (!task) return <div className="p-6 text-center">Loading...</div>;
 
   return (
+    <div>
+
+       <button
+    onClick={() => navigate("/")}
+    className="fixed left-24 top-24 px-4 py-2 bg-gray-200 dark:bg-gray-700 
+               text-gray-800 dark:text-gray-200 rounded-md shadow 
+               hover:bg-gray-300 dark:hover:bg-gray-600 transition"
+  >
+     <IoArrowBack size={20} />
+  </button>
     <div className="p-5 max-w-xl mx-auto relative pb-20">
-      <h1 className="text-2xl font-bold mb-4 text-center">{task.title}</h1>
+      <h1 className="text-2xl font-bold mb-4 mt-20 text-center">{task.title}</h1>
 
       {/* IMAGES */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 mb-4">
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 mb-4 mt-10">
         {task.images?.length > 0 ? (
           task.images.map((img, idx) => (
             <img
@@ -157,7 +168,7 @@ const TaskDetails = () => {
         </div>
       )}
 
-      <div className="fixed bottom-20 right-6 flex flex-col gap-3">
+      <div className="fixed bottom-40 right-20 flex flex-col gap-3">
         {/* EDIT BUTTON */}
         {!isEditing && (
           <button
@@ -202,6 +213,7 @@ const TaskDetails = () => {
           </button>
         )}
       </div>
+    </div>
     </div>
   );
 };
