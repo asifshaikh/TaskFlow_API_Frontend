@@ -27,39 +27,41 @@ const Dashboard = () => {
     images: null,
   });
 
-  const fetchTasks = async () => {
-    setLoading(true);
-    try {
-      const params = {
-        page,
-        per_page: 10,
-        ...(statusFilter && { status: statusFilter }),
-        ...(priorityFilter && { priority: priorityFilter }),
-        ...(search && { search }),
-      };
+const fetchTasks = async () => {
+  setLoading(true);
+  try {
+    const params = {
+      page,
+      per_page: 5,
+      ...(statusFilter && { status: statusFilter }),
+      ...(priorityFilter && { priority: priorityFilter }),
+      ...(search && { search }),
+    };
 
-      const response = await tasksAPI.getTasks(params);
-      console.debug("tasks API response:", response);
+    const response = await tasksAPI.getTasks(params);
+    console.debug("tasks API response:", response);
 
-      let tasks = [];
+    let tasks = [];
 
-      if (response?.data?.data?.tasks) {
-        tasks = response.data.data.tasks;
-      } else if (response?.tasks) {
-        tasks = response.tasks;
-      } else if (response?.data?.tasks) {
-        tasks = response.data.tasks;
-      } else if (Array.isArray(response)) {
-        tasks = response;
-      } else {
-        const arr = Object.values(response).find((v) => Array.isArray(v));
-        if (arr) tasks = arr;
-      }
+    if (response?.data?.data?.tasks) {
+      tasks = response.data.data.tasks;
+    } else if (response?.tasks) {
+      tasks = response.tasks;
+    } else if (response?.data?.tasks) {
+      tasks = response.data.tasks;
+    } else if (Array.isArray(response)) {
+      tasks = response;
+    } else {
+      const arr = Object.values(response).find((v) => Array.isArray(v));
+      if (arr) tasks = arr;
+    }
 
-      if (!Array.isArray(tasks)) {
-        console.warn("Tasks not found in response:", response);
-        tasks = [];
-      }
+
+    if (!Array.isArray(tasks)) {
+      console.warn("Tasks not found in response:", response);
+      tasks = [];
+    }
+
 
       // DATE FILTERS
       if (startDate) {
@@ -104,13 +106,18 @@ const Dashboard = () => {
       setTasks(tasks);
 
       // Set total pages
-      const totalPages =
-        response?.data?.data?.total_pages ||
-        response?.total_pages ||
-        response?.total ||
-        1;
+  
+      const total_pages_from_api =
+  response?.data?.data?.total_pages ||
+  response?.data?.total_pages ||
+  response?.total_pages ||
+  1;
 
-      setTotalPages(Number(totalPages));
+setTotalPages(Number(total_pages_from_api));
+console.log("Total pages:", total_pages_from_api);
+
+
+ 
     } catch (error) {
       console.error("Error fetching tasks:", error);
     } finally {
@@ -249,7 +256,7 @@ const Dashboard = () => {
                 Overdue
               </div>
               <div className="text-3xl font-bold text-red-600 dark:text-red-400">
-                {stats.data.overdue_tasks || 0}
+                {stats.data.overdue_count || 0}
               </div>
             </div>
           </div>

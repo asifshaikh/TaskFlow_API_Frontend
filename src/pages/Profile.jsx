@@ -71,179 +71,171 @@ const Profile = () => {
     }
   };
 
-  return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-8 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-4xl mx-auto mt-6 p-4 bg-gray-100 dark:bg-gray-700 rounded-lg">
-        <h3 className="text-xl font-semibold mb-3 text-gray-800 dark:text-white">
-          Email Notifications
-        </h3>
+return (
+  <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-8 px-4 sm:px-6 lg:px-8">
 
-        {subscriptionStatus === "none" && (
-          <button
-            onClick={handleSubscribe}
-            disabled={loadingSub}
-            className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
-          >
-            {loadingSub ? "Processing..." : "Subscribe to Notifications"}
-          </button>
-        )}
+    {/* PROFILE SECTION FIRST */}
+    <div className="max-w-4xl mx-auto">
+      <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-8">
+        Profile
+      </h1>
 
-        {subscriptionStatus === "pending" && (
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-8 border border-gray-200 dark:border-gray-700">
+
+        {/* Avatar + Name */}
+        <div className="flex items-center space-x-6 mb-6">
+          <div className="w-20 h-20 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
+            <span className="text-white font-bold text-2xl">
+              {user?.name?.charAt(0).toUpperCase() || "U"}
+            </span>
+          </div>
           <div>
-            <p className="text-yellow-500 font-medium mb-2">
-              Confirmation pending — please check your email!
+            <h2 className="text-2xl font-semibold text-gray-900 dark:text-white">
+              {user?.name || "User"}
+            </h2>
+            <p className="text-gray-600 dark:text-gray-400">
+              {user?.email || ""}
             </p>
           </div>
-        )}
+        </div>
 
-        {subscriptionStatus === "confirmed" && (
+        {/* Edit button */}
+        <div className="flex justify-end mb-4">
           <button
-            onClick={handleUnsubscribe}
-            disabled={loadingSub}
-            className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700"
+            onClick={() => setIsEditing((s) => !s)}
+            className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition"
           >
-            {loadingSub ? "Processing..." : "Unsubscribe"}
+            {isEditing ? "Close" : "Edit Profile"}
           </button>
-        )}
-      </div>
+        </div>
 
-      <div className="max-w-4xl mx-auto">
-        <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-8">
-          Profile
-        </h1>
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-8 border border-gray-200 dark:border-gray-700">
-          <div className="flex items-center space-x-6 mb-6">
-            <div className="w-20 h-20 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
-              <span className="text-white font-bold text-2xl">
-                {user?.name?.charAt(0).toUpperCase() || "U"}
-              </span>
-            </div>
-            <div>
-              <h2 className="text-2xl font-semibold text-gray-900 dark:text-white">
-                {user?.name || "User"}
-              </h2>
-              <p className="text-gray-600 dark:text-gray-400">
-                {user?.email || ""}
-              </p>
-            </div>
-          </div>
-          {/* Edit controls */}
-          <div className="flex justify-end mb-4">
-            <button
-              onClick={() => setIsEditing((s) => !s)}
-              className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition"
-            >
-              {isEditing ? "Close" : "Edit Profile"}
-            </button>
-          </div>
+        {/* Edit Form */}
+        {isEditing && (
+          <div className="mb-6">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              Name
+            </label>
 
-          <div className="space-y-4">
-            {isEditing && (
-              <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  Name
-                </label>
-                <input
-                  type="text"
-                  value={form.name}
-                  onChange={(e) => setForm({ ...form, name: e.target.value })}
-                  className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                />
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 mt-3">
-                  Password (leave blank to keep current)
-                </label>
-                <input
-                  type="password"
-                  value={form.password}
-                  onChange={(e) =>
-                    setForm({ ...form, password: e.target.value })
+            <input
+              type="text"
+              value={form.name}
+              onChange={(e) => setForm({ ...form, name: e.target.value })}
+              className="w-full px-4 py-2 mb-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+            />
+
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              Password (leave blank to keep current)
+            </label>
+
+            <input
+              type="password"
+              value={form.password}
+              onChange={(e) => setForm({ ...form, password: e.target.value })}
+              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+            />
+
+            <div className="flex space-x-2 mt-4">
+              <button
+                onClick={async () => {
+                  setSaving(true);
+                  try {
+                    const payload = { name: form.name };
+                    if (form.password) payload.password = form.password;
+
+                    const resp = await authAPI.updateCurrentUser(payload);
+                    const updatedUser = resp?.user || resp?.data || resp || {};
+
+                    login(updatedUser, token);
+                    setForm((f) => ({ ...f, password: "" }));
+                    setIsEditing(false);
+                    alert("Profile updated successfully");
+                  } catch (err) {
+                    console.error(err);
+                    alert("Failed to update profile");
+                  } finally {
+                    setSaving(false);
                   }
-                  className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                />
+                }}
+                disabled={saving}
+                className="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600"
+              >
+                {saving ? "Saving..." : "Update"}
+              </button>
 
-                <div className="flex space-x-2 mt-4">
-                  <button
-                    onClick={async () => {
-                      // call update
-                      setSaving(true);
-                      try {
-                        const payload = { name: form.name };
-                        if (form.password) payload.password = form.password;
-                        const resp = await authAPI.updateCurrentUser(payload);
-                        // normalize response: could be { user: {...} } or user object directly
-                        const updatedUser =
-                          resp?.user || resp?.data || resp || {};
-                        // update context and localStorage via login helper (preserve token)
-                        login(updatedUser, token);
-                        // clear password field
-                        setForm((f) => ({ ...f, password: "" }));
-                        setIsEditing(false);
-                        alert("Profile updated successfully");
-                      } catch (err) {
-                        console.error("Error updating profile:", err);
-                        const backendMessage =
-                          typeof err.response?.data === "string"
-                            ? err.response.data
-                            : err.response?.data?.message ||
-                              err.response?.data?.detail ||
-                              "";
-                        alert(
-                          backendMessage ||
-                            err.message ||
-                            "Failed to update profile"
-                        );
-                      } finally {
-                        setSaving(false);
-                      }
-                    }}
-                    disabled={saving}
-                    className="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 transition disabled:opacity-60"
-                  >
-                    {saving ? "Saving..." : "Update"}
-                  </button>
-                  <button
-                    onClick={() => {
-                      setIsEditing(false);
-                      setForm({ name: user?.name || "", password: "" });
-                    }}
-                    className="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-300 dark:hover:bg-gray-600 transition"
-                  >
-                    Cancel
-                  </button>
-                </div>
-              </div>
-            )}
+              <button
+                onClick={() => {
+                  setIsEditing(false);
+                  setForm({ name: user?.name || "", password: "" });
+                }}
+                className="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-md"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        )}
 
-            {/* rest of profile details */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                User ID
-              </label>
-              <p className="text-gray-900 dark:text-white">
-                {user?.user_id || "N/A"}
-              </p>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                Email
-              </label>
-              <p className="text-gray-900 dark:text-white">
-                {user?.email || "N/A"}
-              </p>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                Name
-              </label>
-              <p className="text-gray-900 dark:text-white">
-                {user?.name || "N/A"}
-              </p>
-            </div>
+        {/* Static profile details */}
+        <div className="space-y-4 mt-6">
+          <div>
+            <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+              User ID
+            </label>
+            <p className="text-gray-900 dark:text-white">{user?.user_id}</p>
+          </div>
+
+          <div>
+            <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+              Email
+            </label>
+            <p className="text-gray-900 dark:text-white">{user?.email}</p>
+          </div>
+
+          <div>
+            <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+              Name
+            </label>
+            <p className="text-gray-900 dark:text-white">{user?.name}</p>
           </div>
         </div>
       </div>
     </div>
-  );
-};
+
+    {/*  EMAIL NOTIFICATIONS SECTION MOVED TO BOTTOM */}
+    <div className="max-w-4xl mx-auto mt-10 p-4 bg-gray-100 dark:bg-gray-700 rounded-lg">
+      <h3 className="text-xl font-semibold mb-3 text-gray-800 dark:text-white">
+        Email Notifications
+      </h3>
+
+      {subscriptionStatus === "none" && (
+        <button
+          onClick={handleSubscribe}
+          disabled={loadingSub}
+          className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+        >
+          {loadingSub ? "Processing..." : "Subscribe to Notifications"}
+        </button>
+      )}
+
+      {subscriptionStatus === "pending" && (
+        <p className="text-yellow-500 font-medium">
+          Confirmation pending — please check your email!
+        </p>
+      )}
+
+      {subscriptionStatus === "confirmed" && (
+        <button
+          onClick={handleUnsubscribe}
+          disabled={loadingSub}
+          className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700"
+        >
+          {loadingSub ? "Processing..." : "Unsubscribe"}
+        </button>
+      )}
+    </div>
+
+  </div>
+);
+}
 
 export default Profile;
