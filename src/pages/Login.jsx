@@ -1,45 +1,44 @@
-import { useState } from 'react';
-import { Link, useNavigate, Navigate } from 'react-router-dom';
-import { useAuth } from '../contexts/AuthContext';
-import { authAPI } from '../services/api';
+import { useState } from "react";
+import { Link, useNavigate, Navigate } from "react-router-dom";
+import { useAuth } from "../contexts/AuthContext";
+import { authAPI } from "../services/api";
 
 const Login = () => {
   const { user } = useAuth();
-
+  const { login } = useAuth();
+  const navigate = useNavigate();
+  const [formData, setFormData] = useState({
+    email: "",
+    password: "",
+  });
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
   if (user) {
     return <Navigate to="/dashboard" replace />;
   }
-  const [formData, setFormData] = useState({
-    email: '',
-    password: '',
-  });
-  const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
-  const { login } = useAuth();
-  const navigate = useNavigate();
-
   const handleChange = (e) => {
     setFormData({
       ...formData,
       [e.target.name]: e.target.value,
     });
-    setError('');
+    setError("");
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');
+    setError("");
     setLoading(true);
 
     try {
       const response = await authAPI.login(formData);
       login(response.user, response.access_token);
-      navigate('/dashboard');
+      navigate("/dashboard");
     } catch (err) {
-      const errorMessage = err.response?.data?.message ||
+      const errorMessage =
+        err.response?.data?.message ||
         err.response?.data?.detail ||
         err.message ||
-        'Login failed. Please try again.';
+        "Login failed. Please try again.";
       setError(errorMessage);
     } finally {
       setLoading(false);
@@ -54,7 +53,7 @@ const Login = () => {
             Sign in to TaskFlow
           </h2>
           <p className="mt-2 text-center text-sm text-gray-600 dark:text-gray-400">
-            Or{' '}
+            Or{" "}
             <Link
               to="/signup"
               className="font-medium text-blue-600 hover:text-blue-500 dark:text-blue-400"
@@ -110,7 +109,7 @@ const Login = () => {
               disabled={loading}
               className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
             >
-              {loading ? 'Signing in...' : 'Sign in'}
+              {loading ? "Signing in..." : "Sign in"}
             </button>
           </div>
         </form>
@@ -120,4 +119,3 @@ const Login = () => {
 };
 
 export default Login;
-
