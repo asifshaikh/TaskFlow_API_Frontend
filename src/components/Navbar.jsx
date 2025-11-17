@@ -3,14 +3,11 @@ import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
 
 const Navbar = () => {
-  const { user, logout } = useAuth();
+  const { user } = useAuth();
   const { theme, toggleTheme } = useTheme();
   const navigate = useNavigate();
 
-  const handleLogout = () => {
-    logout();
-    navigate('/');
-  };
+
 
   return (
     <nav className="bg-white dark:bg-gray-800 shadow-lg border-b border-gray-200 dark:border-gray-700">
@@ -58,13 +55,7 @@ const Navbar = () => {
                   <span className="font-medium">{user.name}</span>
                 </Link>
 
-                {/* Logout Button */}
-                <button
-                  onClick={handleLogout}
-                  className="px-4 py-2 rounded-lg bg-red-500 text-white hover:bg-red-600 transition-colors font-medium"
-                >
-                  Logout
-                </button>
+
               </>
             ) : (
               <>

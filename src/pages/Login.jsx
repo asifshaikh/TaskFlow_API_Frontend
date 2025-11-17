@@ -2,9 +2,12 @@ import { useState } from 'react';
 import { Link, useNavigate, Navigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { authAPI } from '../services/api';
+import { FiEye, FiEyeOff } from "react-icons/fi";
+
 
 const Login = () => {
   const { user } = useAuth();
+  const [showPassword, setShowPassword] = useState(false);
 
   if (user) {
     return <Navigate to="/dashboard" replace />;
@@ -86,22 +89,34 @@ const Login = () => {
                 placeholder="Email address"
               />
             </div>
-            <div>
-              <label htmlFor="password" className="sr-only">
-                Password
-              </label>
+                      {/* Password with toggle */}
+            <div className="relative">
               <input
+                type={showPassword ? "text" : "password"}
                 id="password"
                 name="password"
-                type="password"
+                value={formData.password}          // ← REQUIRED
+                onChange={handleChange}            // ← REQUIRED
                 autoComplete="current-password"
                 required
-                value={formData.password}
-                onChange={handleChange}
-                className="appearance-none rounded-b-lg relative block w-full px-3 py-3 border border-gray-300 dark:border-gray-600 placeholder-gray-500 dark:placeholder-gray-400 text-gray-900 dark:text-white bg-white dark:bg-gray-700 focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
+                className="appearance-none rounded-b-lg block w-full px-3 py-3 pr-10 
+                          border border-gray-300 dark:border-gray-600 
+                          placeholder-gray-500 dark:placeholder-gray-400 
+                          text-gray-900 dark:text-white bg-white dark:bg-gray-700 
+                          focus:outline-none focus:ring-blue-500 focus:border-blue-500 
+                          sm:text-sm"
                 placeholder="Password"
               />
-            </div>
+
+  <button
+    type="button"
+    onClick={() => setShowPassword(!showPassword)}
+    className="absolute top-1/2 right-3 -translate-y-1/2 text-gray-400 hover:text-white"
+  >
+    {showPassword ? <FiEyeOff size={20} /> : <FiEye size={20} />}
+  </button>
+</div>
+
           </div>
 
           <div>

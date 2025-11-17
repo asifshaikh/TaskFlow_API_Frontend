@@ -16,6 +16,8 @@ const Signup = () => {
   });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   // Now conditional return is okay
   if (user) {
@@ -126,38 +128,64 @@ const Signup = () => {
                 placeholder="Email address"
               />
             </div>
-            <div>
-              <label htmlFor="password" className="sr-only">
-                Password
-              </label>
-              <input
-                id="password"
-                name="password"
-                type="password"
-                autoComplete="new-password"
-                required
-                value={formData.password}
-                onChange={handleChange}
-                className="appearance-none rounded-lg relative block w-full px-3 py-3 border border-gray-300 dark:border-gray-600 placeholder-gray-500 dark:placeholder-gray-400 text-gray-900 dark:text-white bg-white dark:bg-gray-700 focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
-                placeholder="Password (min. 6 characters)"
-              />
-            </div>
-            <div>
-              <label htmlFor="confirmPassword" className="sr-only">
-                Confirm Password
-              </label>
-              <input
-                id="confirmPassword"
-                name="confirmPassword"
-                type="password"
-                autoComplete="new-password"
-                required
-                value={formData.confirmPassword}
-                onChange={handleChange}
-                className="appearance-none rounded-lg relative block w-full px-3 py-3 border border-gray-300 dark:border-gray-600 placeholder-gray-500 dark:placeholder-gray-400 text-gray-900 dark:text-white bg-white dark:bg-gray-700 focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
-                placeholder="Confirm Password"
-              />
-            </div>
+           {/* Password with toggle */}
+<div className="relative">
+  <input
+    id="password"
+    name="password"
+    type={showPassword ? "text" : "password"}
+    autoComplete="new-password"
+    required
+    value={formData.password}
+    onChange={handleChange}
+    className="appearance-none rounded-lg block w-full px-3 py-3 pr-16
+               border border-gray-300 dark:border-gray-600
+               placeholder-gray-500 dark:placeholder-gray-400
+               text-gray-900 dark:text-white bg-white dark:bg-gray-700
+               focus:outline-none focus:ring-blue-500 focus:border-blue-500
+               sm:text-sm"
+    placeholder="Password (min. 6 characters)"
+  />
+
+  {/* Toggle Button */}
+  <button
+    type="button"
+    onClick={() => setShowPassword(!showPassword)}
+    className="absolute inset-y-0 right-0 px-3 flex items-center text-gray-600 dark:text-gray-300 text-sm font-medium"
+  >
+    {showPassword ? "Hide" : "Show"}
+  </button>
+</div>
+
+           {/* Confirm Password with toggle */}
+<div className="relative">
+  <input
+    type={showConfirmPassword ? "text" : "password"}
+    id="confirmPassword"
+    name="confirmPassword"
+    value={formData.confirmPassword}
+    onChange={handleChange}
+    autoComplete="new-password"
+    required
+    className="appearance-none rounded-lg block w-full px-3 py-3 pr-16
+               border border-gray-300 dark:border-gray-600
+               placeholder-gray-500 dark:placeholder-gray-400
+               text-gray-900 dark:text-white bg-white dark:bg-gray-700
+               focus:outline-none focus:ring-blue-500 focus:border-blue-500
+               sm:text-sm"
+    placeholder="Confirm Password"
+  />
+
+  {/* Toggle Button */}
+  <button
+    type="button"
+    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+    className="absolute inset-y-0 right-0 px-3 flex items-center text-gray-600 dark:text-gray-300 text-sm font-medium"
+  >
+    {showConfirmPassword ? "Hide" : "Show"}
+  </button>
+</div>
+
           </div>
 
           <div>

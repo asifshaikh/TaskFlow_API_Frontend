@@ -7,7 +7,12 @@ import { useNavigate } from "react-router-dom";
 
 
 const Profile = () => {
-  const { user, token, login } = useAuth();
+    const handleLogout = () => {
+    logout();
+    navigate('/');
+  };
+  
+  const { user, token, login,logout  } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
   const [form, setForm] = useState({
     name: user?.name || "",
@@ -16,6 +21,7 @@ const Profile = () => {
   const [saving, setSaving] = useState(false);
   const [subscriptionStatus, setSubscriptionStatus] = useState("none");
   const [loadingSub, setLoadingSub] = useState(false);
+  
 const navigate = useNavigate();
 
 
@@ -95,7 +101,13 @@ return (
       <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-8">
         Profile
       </h1>
-
+                    {/* Logout Button */}
+                <button
+                  onClick={handleLogout}
+                  className="fixed right-24 top-24 px-4 py-2 rounded-lg bg-red-500 text-white hover:bg-red-600 transition-colors font-medium"
+                >
+                  Logout
+                </button>
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-8 border border-gray-200 dark:border-gray-700">
   <div className="flex space-x-72 ">
 
