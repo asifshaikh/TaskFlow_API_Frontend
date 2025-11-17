@@ -27,32 +27,6 @@ const Dashboard = () => {
     images: null,
   });
 
-  const fetchTasks = async () => {
-    setLoading(true);
-    try {
-      const response = await tasksAPI.getTasks({
-        page,
-        per_page: 1,
-        status: statusFilter,
-        priority: priorityFilter,
-        search,
-      });
-
-      const tasksData = response?.data?.tasks || [];
-      setTasks(tasksData);
-
-      const total_pages_from_api = response?.data?.data?.total_pages || 1;
-      setTotalPages(Number(total_pages_from_api));
-
-      console.log("Fetched tasks:", tasksData);
-      console.log("Total pages:", total_pages_from_api);
-    } catch (error) {
-      console.error("Error fetching tasks:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const fetchStats = async () => {
     try {
       const statsData = await tasksAPI.getTaskStats();
@@ -63,13 +37,74 @@ const Dashboard = () => {
     }
   };
 
+  const fetchTasks = async () => {
+    setLoading(true);
+    try {
+      const params = {
+        page,
+        per_page: 3,
+      };
+
+      if (statusFilter) params.status = statusFilter;
+      if (priorityFilter) params.priority = priorityFilter;
+      if (search) params.search = search;
+
+      const response = await tasksAPI.getTasks(params);
+
+      let tasks = response.data?.tasks;
+
+      // ---- FRONTEND DATE FILTERS ----
+      if (startDate) {
+        tasks = tasks.filter((t) => t.due_date && t.due_date >= startDate);
+      }
+      if (endDate) {
+        tasks = tasks.filter((t) => t.due_date && t.due_date <= endDate);
+      }
+
+      // ---- SORTING ----
+      if (sortBy === "due_asc") {
+        tasks = [...tasks].sort(
+          (a, b) => new Date(a.due_date) - new Date(b.due_date)
+        );
+      }
+      if (sortBy === "due_desc") {
+        tasks = [...tasks].sort(
+          (a, b) => new Date(b.due_date) - new Date(a.due_date)
+        );
+      }
+      if (sortBy === "priority_high_low") {
+        const order = { HIGH: 3, MEDIUM: 2, LOW: 1 };
+        tasks = [...tasks].sort(
+          (a, b) => order[b.priority] - order[a.priority]
+        );
+      }
+      if (sortBy === "priority_low_high") {
+        const order = { HIGH: 3, MEDIUM: 2, LOW: 1 };
+        tasks = [...tasks].sort(
+          (a, b) => order[a.priority] - order[b.priority]
+        );
+      }
+
+      setTasks(tasks);
+      console.log(response.data);
+
+      setTotalPages(response.data.total_pages || 1);
+    } catch (error) {
+      console.error("Error fetching tasks:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
   useEffect(() => {
     fetchTasks();
+  }, [page, statusFilter, priorityFilter, startDate, endDate, sortBy, search]);
+
+  useEffect(() => {
     fetchStats();
   }, [statusFilter, priorityFilter]);
-  
+
   useEffect(() => {
-const delay = setTimeout(() => {
+    const delay = setTimeout(() => {
       setPage(1);
     }, 500);
 
@@ -122,26 +157,25 @@ const delay = setTimeout(() => {
       Number(stats.data.status_counts?.COMPLETED || 0)
     : 0;
 
-const markCompleted = async (taskId) => {
-  try {
-    await tasksAPI.updateTaskStatus(taskId, "COMPLETED");
-    fetchTasks();
-    fetchStats();
-  } catch (err) {
-    console.error("Error marking task completed:", err);
-  }
-};
+  const markCompleted = async (taskId) => {
+    try {
+      await tasksAPI.updateTaskStatus(taskId, "COMPLETED");
+      fetchTasks();
+      fetchStats();
+    } catch (err) {
+      console.error("Error marking task completed:", err);
+    }
+  };
 
-const markIncomplete = async (taskId) => {
-  try {
-    await tasksAPI.updateTaskStatus(taskId, "PENDING");
-    fetchTasks();
-    fetchStats();
-  } catch (err) {
-    console.error("Error marking task incomplete:", err);
-  }
-};
-
+  const markIncomplete = async (taskId) => {
+    try {
+      await tasksAPI.updateTaskStatus(taskId, "PENDING");
+      fetchTasks();
+      fetchStats();
+    } catch (err) {
+      console.error("Error marking task incomplete:", err);
+    }
+  };
 
   const handleTaskUpdate = () => {
     fetchTasks();
@@ -163,7 +197,6 @@ const markIncomplete = async (taskId) => {
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-8 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
-
         {/* Welcome Section */}
         <div className="mb-8">
           <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-2">
@@ -218,7 +251,6 @@ const markIncomplete = async (taskId) => {
         {/* Filters */}
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 mb-8 border border-gray-200 dark:border-gray-700">
           <div className="flex flex-col md:flex-row gap-4 items-center">
-
             <div className="flex-1 w-full">
               <input
                 type="text"
@@ -270,46 +302,32 @@ const markIncomplete = async (taskId) => {
               className="px-4 py-2 border rounded-lg bg-white dark:bg-gray-700"
             />
 
-{/* <select
-  value={sortBy}
-  onChange={(e) => setSortBy(e.target.value)}
-  className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg 
-             bg-white dark:bg-gray-700 text-gray-900 dark:text-white
-             transition-all duration-200 ease-in-out
-             focus:ring-2 focus:ring-purple-500 focus:border-purple-500
-             hover:scale-[1.02] hover:shadow-md cursor-pointer"
->
-  <option value="">Sort</option>
-  <option value="due_asc">Due Date ↑</option>
-  <option value="due_desc">Due Date ↓</option>
-  <option value="priority_high_low">Priority: High → Low</option>
-  <option value="priority_low_high">Priority: Low → High</option>
-</select> */}
-
-
-<div className="relative inline-block group">  
-  {/* Rotating Border ON HOVER */}
-  <div className="
+            <div className="relative inline-block group">
+              {/* Rotating Border ON HOVER */}
+              <div
+                className="
       absolute inset-0 rounded-lg p-[2px] pointer-events-none 
       opacity-0 group-hover:opacity-100 
       transition-opacity duration-300
-    ">
-    <div className="
+    "
+              >
+                <div
+                  className="
         absolute inset-0 rounded-lg 
         bg-[conic-gradient(from_0deg,#a855f7,#3b82f6,#9333ea,#a855f7)]
         animate-none group-hover:animate-spin-border
-      ">
-    </div>
-  </div>
+      "
+                ></div>
+              </div>
 
-  {/* Background layer so spinning border doesn't cover select */}
-  <div className="absolute inset-[3px] bg-white dark:bg-gray-700 rounded-lg pointer-events-none"></div>
+              {/* Background layer so spinning border doesn't cover select */}
+              <div className="absolute inset-[3px] bg-white dark:bg-gray-700 rounded-lg pointer-events-none"></div>
 
-  {/* SELECT */}
-  <select
-    value={sortBy}
-    onChange={(e) => setSortBy(e.target.value)}
-    className="
+              {/* SELECT */}
+              <select
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value)}
+                className="
       relative z-10 px-4 py-2 w-full rounded-lg 
       bg-transparent dark:text-white text-gray-900
        dark:bg-gray-700
@@ -319,28 +337,25 @@ const markIncomplete = async (taskId) => {
       focus:ring-2 focus:ring-purple-500 focus:border-purple-500
       cursor-pointer
     "
-  >
-    <option value="">Sort</option>
-    <option value="due_asc">Due Date ↑</option>
-    <option value="due_desc">Due Date ↓</option>
-    <option value="priority_high_low">Priority: High → Low</option>
-    <option value="priority_low_high">Priority: Low → High</option>
-  </select>
-</div>
-
-
-
-           <button
-                onClick={() => setShowCreateModal(true)}
-                className="group px-6 py-2 bg-gradient-to-r from-blue-500 to-purple-600 text-white 
-                          rounded-lg font-medium hover:scale-105 transition-all flex items-center gap-2"
               >
-                <span className="inline-block transition-transform duration-600 group-hover:rotate-2880">
-                  +
-                </span>
-                Create Task
-            </button>
+                <option value="">Sort</option>
+                <option value="due_asc">Due Date ↑</option>
+                <option value="due_desc">Due Date ↓</option>
+                <option value="priority_high_low">Priority: High → Low</option>
+                <option value="priority_low_high">Priority: Low → High</option>
+              </select>
+            </div>
 
+            <button
+              onClick={() => setShowCreateModal(true)}
+              className="group px-6 py-2 bg-gradient-to-r from-blue-500 to-purple-600 text-white 
+                          rounded-lg font-medium hover:scale-105 transition-all flex items-center gap-2"
+            >
+              <span className="inline-block transition-transform duration-600 group-hover:rotate-2880">
+                +
+              </span>
+              Create Task
+            </button>
           </div>
         </div>
 
@@ -348,7 +363,9 @@ const markIncomplete = async (taskId) => {
         {loading ? (
           <div className="text-center py-12">
             <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
-            <p className="mt-4 text-gray-600 dark:text-gray-400">Loading tasks...</p>
+            <p className="mt-4 text-gray-600 dark:text-gray-400">
+              Loading tasks...
+            </p>
           </div>
         ) : tasks.length === 0 ? (
           <div className="text-center py-12 bg-white dark:bg-gray-800 rounded-lg shadow-md border border-gray-200 dark:border-gray-700">
@@ -361,86 +378,65 @@ const markIncomplete = async (taskId) => {
           </div>
         ) : (
           <>
-                        <div className="flex flex-col gap-6 mb-8">
-                          {tasks.map((task) => (
-                            <div
+            <div className="flex flex-col gap-6 mb-8">
+              {tasks.map((task) => (
+                <div
                   key={task.task_id ?? task.id}
                   className="transform transition-all duration-200 hover:scale-[1.02] hover:shadow-lg bg-transparent rounded-xl"
                 >
-                <TaskCard
-                                          task={task}
-                              markCompleted={markCompleted}
-                  markIncomplete={markIncomplete}
-                  onUpdate={handleTaskUpdate}
-                              onDelete={handleTaskDelete}
-                            />
-            
+                  <TaskCard
+                    task={task}
+                    markCompleted={markCompleted}
+                    markIncomplete={markIncomplete}
+                    onUpdate={handleTaskUpdate}
+                    onDelete={handleTaskDelete}
+                  />
                 </div>
               ))}
-                        </div>
-
-            <div className="flex justify-center items-center space-x-2 mt-4">
-              <button
-                onClick={() => setPage((p) => Math.max(1, p - 1))}
-                disabled={page === 1}
-                className="px-4 py-2 border rounded-lg ..."
-              >
-                Previous
-              </button>
-
-              <span className="px-4 py-2">
-                Page {page} of {totalPages}
-              </span>
-
-              <button
-                onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-                disabled={page === totalPages}
-                className="px-4 py-2 border rounded-lg ..."
-              >
-                Next
-              </button>
             </div>
-         {totalPages > 1 && (
-  <div className="flex justify-center items-center space-x-2">
-    {/* Previous Button */}
-    <button
-      onClick={() => setPage((p) => Math.max(1, p - 1))}
-      disabled={page === 1}
-      className={`
+
+            {totalPages > 1 && (
+              <div className="flex justify-center items-center space-x-2">
+                {/* Previous Button */}
+                <button
+                  onClick={() => setPage((p) => Math.max(1, p - 1))}
+                  disabled={page === 1}
+                  className={`
         relative px-7 py-2 rounded-lg text-white font-medium
         transition-all duration-300
-        ${page === 1 
-          ? "bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 shadow-md cursor-not-allowed opacity-50"
-          : "bg-gradient-to-r from-blue-500 to-purple-600 shadow-md hover:shadow-lg hover:from-purple-500 hover:to-blue-600 transform hover:scale-[1.05]"
+        ${
+          page === 1
+            ? "bg-gray-300 dark:bg-gray-800 text-gray-700 dark:text-gray-300 shadow-md cursor-not-allowed opacity-50"
+            : "bg-gradient-to-r from-blue-500 to-purple-600 shadow-md hover:shadow-lg hover:from-purple-500 hover:to-blue-600 transform hover:scale-[1.05]"
         }
       `}
-    >
-      Previous
-    </button>
+                >
+                  Previous
+                </button>
 
-    {/* Page Info */}
-    <span className="px-4 py-2 text-gray-700 dark:text-gray-300">
-      Page {page} of {totalPages}
-    </span>
+                {/* Page Info */}
+                <span className="px-4 py-2 text-gray-700 dark:text-gray-300">
+                  Page {page} of {totalPages}
+                </span>
 
-    {/* Next Button */}
-    <button
-      onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-      disabled={page === totalPages}
-      className={`
+                {/* Next Button */}
+                <button
+                  onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                  disabled={page === totalPages}
+                  className={`
         relative px-7 py-2 rounded-lg text-white font-medium
         transition-all duration-500
-        ${page === totalPages 
-          ? "bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 shadow-md cursor-not-allowed opacity-50"
-          : "bg-gradient-to-r from-blue-500 to-purple-600 shadow-md hover:shadow-lg hover:from-purple-500 hover:to-blue-600 transform hover:scale-[1.05]"
+        ${
+          page === totalPages
+            ? "bg-gray-300 dark:bg-gray-800 text-gray-700 dark:text-gray-300 shadow-md cursor-not-allowed opacity-50"
+            : "bg-gradient-to-r from-blue-500 to-purple-600 shadow-md hover:shadow-lg hover:from-purple-500 hover:to-blue-600 transform hover:scale-[1.05]"
         }
       `}
-    >
-      Next
-    </button>
-  </div>
-)}
-
+                >
+                  Next
+                </button>
+              </div>
+            )}
           </>
         )}
 
@@ -554,7 +550,6 @@ const markIncomplete = async (taskId) => {
             </div>
           </div>
         )}
-
       </div>
     </div>
   );
