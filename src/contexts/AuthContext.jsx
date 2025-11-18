@@ -35,10 +35,30 @@ export const AuthProvider = ({ children }) => {
       setToken(storedToken);
 
       const storedUser = localStorage.getItem('user');
-      if (storedUser) {
-        try {
-          setUser(JSON.parse(storedUser));
-        } catch (error) {
+      if (storedUser) 
+      {
+        try 
+        {
+              const parsedUser = JSON.parse(storedUser);
+              setUser(parsedUser);
+              setLoading(false); // Stop loading immediately if we have stored user
+          
+            // Optional: Verify token is still valid in background
+              try 
+              {
+                const currentUser = await authAPI.getCurrentUser();
+                setUser(currentUser);
+                localStorage.setItem('user', JSON.stringify(currentUser));
+              } 
+              catch (error) 
+              {
+                // Token might be expired, but don't clear if we just logged in
+                console.error('Error verifying user:', error);
+              }
+              return;
+        } 
+        catch (error) 
+        {
           console.error('Error parsing stored user:', error);
           localStorage.removeItem('user');
         }

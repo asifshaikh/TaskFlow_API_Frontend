@@ -8,6 +8,7 @@ import Login from './pages/Login';
 import Signup from './pages/Signup';
 import Dashboard from './pages/Dashboard';
 import Profile from './pages/Profile';
+import OAuthCallback from './pages/Oauthcallback.jsx';
 
 function App() {
   return (
@@ -16,6 +17,7 @@ function App() {
         <Router>
           <Layout>
             <Routes>
+              <Route path="/oauth/callback" element={<OAuthCallback />} />
               <Route path="/" element={<Home />} />
               <Route path="/login" element={<Login />} />
               <Route path="/signup" element={<Signup />} />
