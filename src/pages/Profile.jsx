@@ -22,6 +22,7 @@ const Profile = () => {
   const [subscriptionStatus, setSubscriptionStatus] = useState("none");
   const [loadingSub, setLoadingSub] = useState(false);
   
+
 const navigate = useNavigate();
 
 
