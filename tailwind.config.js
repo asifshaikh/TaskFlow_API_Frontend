@@ -21,9 +21,16 @@ export default {
           900: '#0c4a6e',
         },
       },
+      keyframes: {
+        rotateSun: {
+          '0%': { transform: 'rotate(0deg)' },
+          '100%': { transform: 'rotate(360deg)' },
+        },
+      },
+      animation: {
+        rotateSun: 'rotateSun 4s linear infinite',
+      },
     },
-    
   },
   plugins: [],
 }
-

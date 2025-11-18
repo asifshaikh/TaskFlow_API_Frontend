@@ -199,13 +199,16 @@ const Dashboard = () => {
       <div className="max-w-7xl mx-auto">
         {/* Welcome Section */}
         <div className="mb-8">
-          <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-2">
-            {getGreeting()}, {user?.name || "User"}! 👋
+          <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-2 flex items-center gap-2">
+            {getGreeting()}, {user?.name || "User"}!
+            <span className="wave-emoji">👋</span>
           </h1>
-          <p className="text-gray-600 dark:text-gray-400">
-            Here's your task management dashboard
-          </p>
-        </div>
+
+  <p className="text-gray-600 dark:text-gray-400">
+    Here's your task management dashboard
+  </p>
+</div>
+
 
         {/* Stats Cards */}
         {stats && (
