@@ -15,6 +15,7 @@ import Dashboard from "./pages/Dashboard";
 import Profile from "./pages/Profile";
 import TaskDetails from "./pages/TaskDetails";
 import NotFound from "./pages/NotFound";
+import OAuthCallback from './pages/Oauthcallback.jsx';
 
 function App() {
   return (
@@ -23,6 +24,7 @@ function App() {
         <Router>
           <Layout>
             <Routes>
+              <Route path="/oauth/callback" element={<OAuthCallback />} />
               <Route path="/" element={<Home />} />
               <Route path="/login" element={<Login />} />
               <Route path="/signup" element={<Signup />} />

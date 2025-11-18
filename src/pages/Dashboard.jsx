@@ -42,7 +42,7 @@ const Dashboard = () => {
     try {
       const params = {
         page,
-        per_page: 3,
+        per_page: 10,
       };
 
       if (statusFilter) params.status = statusFilter;

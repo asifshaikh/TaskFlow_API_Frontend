@@ -64,6 +64,16 @@ export const authAPI = {
     const response = await api.put("/auth/user", data);
     return response.data;
   },
+
+  // Google OAuth - Redirects to backend OAuth flow
+  googleLogin: () => {
+    window.location.href = `${API_BASE_URL}/auth/login/google`;
+  },
+
+  // GitHub OAuth - Redirects to backend OAuth flow
+  githubLogin: () => {
+    window.location.href = `${API_BASE_URL}/auth/login/github`;
+  },
 };
 
 export const notificationsAPI = {
