@@ -5,10 +5,9 @@ import { authAPI } from '../services/api';
 
 const Signup = () => {
   const { user } = useAuth();
-  
-  if (user) {
-    return <Navigate to="/dashboard" replace />;
-  }
+  const navigate = useNavigate();
+
+  // Hooks must be at the top
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -17,7 +16,13 @@ const Signup = () => {
   });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const navigate = useNavigate();
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+
+  // Now conditional return is okay
+  if (user) {
+    return <Navigate to="/dashboard" replace />;
+  }
 
   const handleChange = (e) => {
     setFormData({
@@ -56,10 +61,11 @@ const Signup = () => {
       });
       navigate('/login');
     } catch (err) {
-      const errorMessage = err.response?.data?.message || 
-                          err.response?.data?.detail || 
-                          err.message || 
-                          'Signup failed. Please try again.';
+      const errorMessage =
+        err.response?.data?.message ||
+        err.response?.data?.detail ||
+        err.message ||
+        'Signup failed. Please try again.';
       setError(errorMessage);
     } finally {
       setLoading(false);
@@ -70,11 +76,6 @@ const Signup = () => {
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8">
         <div>
-          <div className="flex justify-center">
-            <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center shadow-lg">
-              <span className="text-white font-bold text-2xl">T</span>
-            </div>
-          </div>
           <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900 dark:text-white">
             Create your account
           </h2>
@@ -127,38 +128,64 @@ const Signup = () => {
                 placeholder="Email address"
               />
             </div>
-            <div>
-              <label htmlFor="password" className="sr-only">
-                Password
-              </label>
-              <input
-                id="password"
-                name="password"
-                type="password"
-                autoComplete="new-password"
-                required
-                value={formData.password}
-                onChange={handleChange}
-                className="appearance-none rounded-lg relative block w-full px-3 py-3 border border-gray-300 dark:border-gray-600 placeholder-gray-500 dark:placeholder-gray-400 text-gray-900 dark:text-white bg-white dark:bg-gray-700 focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
-                placeholder="Password (min. 6 characters)"
-              />
-            </div>
-            <div>
-              <label htmlFor="confirmPassword" className="sr-only">
-                Confirm Password
-              </label>
-              <input
-                id="confirmPassword"
-                name="confirmPassword"
-                type="password"
-                autoComplete="new-password"
-                required
-                value={formData.confirmPassword}
-                onChange={handleChange}
-                className="appearance-none rounded-lg relative block w-full px-3 py-3 border border-gray-300 dark:border-gray-600 placeholder-gray-500 dark:placeholder-gray-400 text-gray-900 dark:text-white bg-white dark:bg-gray-700 focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
-                placeholder="Confirm Password"
-              />
-            </div>
+           {/* Password with toggle */}
+<div className="relative">
+  <input
+    id="password"
+    name="password"
+    type={showPassword ? "text" : "password"}
+    autoComplete="new-password"
+    required
+    value={formData.password}
+    onChange={handleChange}
+    className="appearance-none rounded-lg block w-full px-3 py-3 pr-16
+               border border-gray-300 dark:border-gray-600
+               placeholder-gray-500 dark:placeholder-gray-400
+               text-gray-900 dark:text-white bg-white dark:bg-gray-700
+               focus:outline-none focus:ring-blue-500 focus:border-blue-500
+               sm:text-sm"
+    placeholder="Password (min. 6 characters)"
+  />
+
+  {/* Toggle Button */}
+  <button
+    type="button"
+    onClick={() => setShowPassword(!showPassword)}
+    className="absolute inset-y-0 right-0 px-3 flex items-center text-gray-600 dark:text-gray-300 text-sm font-medium"
+  >
+    {showPassword ? "Hide" : "Show"}
+  </button>
+</div>
+
+           {/* Confirm Password with toggle */}
+<div className="relative">
+  <input
+    type={showConfirmPassword ? "text" : "password"}
+    id="confirmPassword"
+    name="confirmPassword"
+    value={formData.confirmPassword}
+    onChange={handleChange}
+    autoComplete="new-password"
+    required
+    className="appearance-none rounded-lg block w-full px-3 py-3 pr-16
+               border border-gray-300 dark:border-gray-600
+               placeholder-gray-500 dark:placeholder-gray-400
+               text-gray-900 dark:text-white bg-white dark:bg-gray-700
+               focus:outline-none focus:ring-blue-500 focus:border-blue-500
+               sm:text-sm"
+    placeholder="Confirm Password"
+  />
+
+  {/* Toggle Button */}
+  <button
+    type="button"
+    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+    className="absolute inset-y-0 right-0 px-3 flex items-center text-gray-600 dark:text-gray-300 text-sm font-medium"
+  >
+    {showConfirmPassword ? "Hide" : "Show"}
+  </button>
+</div>
+
           </div>
 
           <div>

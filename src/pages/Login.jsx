@@ -2,44 +2,47 @@ import { useState } from 'react';
 import { Link, useNavigate, Navigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { authAPI } from '../services/api';
+import { FiEye, FiEyeOff } from "react-icons/fi";
+
 
 const Login = () => {
   const { user } = useAuth();
+  const { login } = useAuth();
+  const navigate = useNavigate();
+  const [formData, setFormData] = useState({
+    email: "",
+    password: "",
+  });
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false); 
+  const [showPassword, setShowPassword] = useState(false);
 
   if (user) {
     return <Navigate to="/dashboard" replace />;
   }
-  const [formData, setFormData] = useState({
-    email: '',
-    password: '',
-  });
-  const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
-  const { login } = useAuth();
-  const navigate = useNavigate();
-
   const handleChange = (e) => {
     setFormData({
       ...formData,
       [e.target.name]: e.target.value,
     });
-    setError('');
+    setError("");
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');
+    setError("");
     setLoading(true);
 
     try {
       const response = await authAPI.login(formData);
       login(response.user, response.access_token);
-      navigate('/dashboard');
+      navigate("/dashboard");
     } catch (err) {
-      const errorMessage = err.response?.data?.message ||
+      const errorMessage =
+        err.response?.data?.message ||
         err.response?.data?.detail ||
         err.message ||
-        'Login failed. Please try again.';
+        "Login failed. Please try again.";
       setError(errorMessage);
     } finally {
       setLoading(false);
@@ -50,16 +53,11 @@ const Login = () => {
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8">
         <div>
-          <div className="flex justify-center">
-            <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center shadow-lg">
-              <span className="text-white font-bold text-2xl">T</span>
-            </div>
-          </div>
           <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900 dark:text-white">
             Sign in to TaskFlow
           </h2>
           <p className="mt-2 text-center text-sm text-gray-600 dark:text-gray-400">
-            Or{' '}
+            Or{" "}
             <Link
               to="/signup"
               className="font-medium text-blue-600 hover:text-blue-500 dark:text-blue-400"
@@ -91,22 +89,34 @@ const Login = () => {
                 placeholder="Email address"
               />
             </div>
-            <div>
-              <label htmlFor="password" className="sr-only">
-                Password
-              </label>
+                      {/* Password with toggle */}
+            <div className="relative">
               <input
+                type={showPassword ? "text" : "password"}
                 id="password"
                 name="password"
-                type="password"
+                value={formData.password}          // ← REQUIRED
+                onChange={handleChange}            // ← REQUIRED
                 autoComplete="current-password"
                 required
-                value={formData.password}
-                onChange={handleChange}
-                className="appearance-none rounded-b-lg relative block w-full px-3 py-3 border border-gray-300 dark:border-gray-600 placeholder-gray-500 dark:placeholder-gray-400 text-gray-900 dark:text-white bg-white dark:bg-gray-700 focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
+                className="appearance-none rounded-b-lg block w-full px-3 py-3 pr-10 
+                          border border-gray-300 dark:border-gray-600 
+                          placeholder-gray-500 dark:placeholder-gray-400 
+                          text-gray-900 dark:text-white bg-white dark:bg-gray-700 
+                          focus:outline-none focus:ring-blue-500 focus:border-blue-500 
+                          sm:text-sm"
                 placeholder="Password"
               />
-            </div>
+
+  <button
+    type="button"
+    onClick={() => setShowPassword(!showPassword)}
+    className="absolute top-1/2 right-3 -translate-y-1/2 text-gray-400 hover:text-white"
+  >
+    {showPassword ? <FiEyeOff size={20} /> : <FiEye size={20} />}
+  </button>
+</div>
+
           </div>
 
           <div>
@@ -115,7 +125,7 @@ const Login = () => {
               disabled={loading}
               className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
             >
-              {loading ? 'Signing in...' : 'Sign in'}
+              {loading ? "Signing in..." : "Sign in"}
             </button>
           </div>
         </form>
@@ -179,4 +189,3 @@ const Login = () => {
 };
 
 export default Login;
-

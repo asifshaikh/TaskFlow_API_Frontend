@@ -1,13 +1,7 @@
-// authContext.jsx
-import { createContext, useContext } from "react";
-
-export const AuthContext = createContext();
-
-export const useAuth = () => {
-  const context = useContext(AuthContext);
-  if (!context) throw new Error("useAuth must be used within an AuthProvider");
-  return context;
-};
+// authProvider.jsx
+import { useState, useEffect, useCallback } from "react";
+import { AuthContext } from "./AuthContext";
+import { authAPI } from "../services/api";
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
@@ -94,4 +88,3 @@ export const AuthProvider = ({ children }) => {
     </AuthContext.Provider>
   );
 };
-
