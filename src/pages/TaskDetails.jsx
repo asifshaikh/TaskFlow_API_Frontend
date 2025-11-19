@@ -128,26 +128,36 @@ const TaskDetails = () => {
 
             <div className="grid grid-cols-2 gap-3">
               <select
-                className="p-2 border rounded-md text-sm"
+                className="p-2 border border-white dark:border-white rounded-md text-sm text-white dark:text-white bg-transparent"
                 value={formData.status}
                 onChange={(e) =>
                   setFormData({ ...formData, status: e.target.value })
                 }
               >
-                <option value="PENDING">Pending</option>
-                <option value="COMPLETED">Completed</option>
+                <option className="text-black bg-white" value="PENDING">
+                  Pending
+                </option>
+                <option className="text-black bg-white" value="COMPLETED">
+                  Completed
+                </option>
               </select>
 
               <select
-                className="p-2 border rounded-md text-sm"
+                className="p-2 border border-white dark:border-white rounded-md text-sm text-white dark:text-white bg-transparent"
                 value={formData.priority}
                 onChange={(e) =>
                   setFormData({ ...formData, priority: e.target.value })
                 }
               >
-                <option value="LOW">Low</option>
-                <option value="MEDIUM">Medium</option>
-                <option value="HIGH">High</option>
+                <option className="text-black bg-white" value="LOW">
+                  Low
+                </option>
+                <option className="text-black bg-white" value="MEDIUM">
+                  Medium
+                </option>
+                <option className="text-black bg-white" value="HIGH">
+                  High
+                </option>
               </select>
             </div>
 
