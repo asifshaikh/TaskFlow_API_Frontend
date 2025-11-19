@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { tasksAPI } from "../services/api";
 import { FiCheckCircle } from "react-icons/fi";
 
-const TaskCard = ({ task }) => {
+const TaskCard = ({ task , refreshStats}) => {
   const navigate = useNavigate();
 
   // Local state for smooth toggle
@@ -52,7 +52,7 @@ const TaskCard = ({ task }) => {
 
     try {
       await tasksAPI.updateTask(task.task_id, { status: newStatus });
-      // NO onUpdate call → prevents parent refresh
+      refreshStats();
     } catch (err) {
       console.log(err);
       alert("Failed to update status");
