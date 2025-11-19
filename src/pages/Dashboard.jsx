@@ -157,36 +157,6 @@ const Dashboard = () => {
       Number(stats.data.status_counts?.COMPLETED || 0)
     : 0;
 
-  const markCompleted = async (taskId) => {
-    try {
-      await tasksAPI.updateTaskStatus(taskId, "COMPLETED");
-      fetchTasks();
-      fetchStats();
-    } catch (err) {
-      console.error("Error marking task completed:", err);
-    }
-  };
-
-  const markIncomplete = async (taskId) => {
-    try {
-      await tasksAPI.updateTaskStatus(taskId, "PENDING");
-      fetchTasks();
-      fetchStats();
-    } catch (err) {
-      console.error("Error marking task incomplete:", err);
-    }
-  };
-
-  const handleTaskUpdate = () => {
-    fetchTasks();
-    fetchStats();
-  };
-
-  const handleTaskDelete = () => {
-    fetchTasks();
-    fetchStats();
-  };
-
   const getGreeting = () => {
     const hour = new Date().getHours();
     if (hour < 12) return "Good Morning";
@@ -204,11 +174,10 @@ const Dashboard = () => {
             <span className="wave-emoji">👋</span>
           </h1>
 
-  <p className="text-gray-600 dark:text-gray-400">
-    Here's your task management dashboard
-  </p>
-</div>
-
+          <p className="text-gray-600 dark:text-gray-400">
+            Here's your task management dashboard
+          </p>
+        </div>
 
         {/* Stats Cards */}
         {stats && (
@@ -275,6 +244,7 @@ const Dashboard = () => {
               <option value="">All Status</option>
               <option value="PENDING">Pending</option>
               <option value="COMPLETED">Completed</option>
+              <option value="IN_PROGRESS">In Progress</option>
             </select>
 
             <select
@@ -387,13 +357,7 @@ const Dashboard = () => {
                   key={task.task_id ?? task.id}
                   className="transform transition-all duration-200 hover:scale-[1.02] hover:shadow-lg bg-transparent rounded-xl"
                 >
-                  <TaskCard
-                    task={task}
-                    markCompleted={markCompleted}
-                    markIncomplete={markIncomplete}
-                    onUpdate={handleTaskUpdate}
-                    onDelete={handleTaskDelete}
-                  />
+                  <TaskCard task={task} refreshStats={fetchStats} />
                 </div>
               ))}
             </div>
@@ -505,7 +469,7 @@ const Dashboard = () => {
                     Due Date
                   </label>
                   <input
-                    type="date"
+                    type="datetime-local"
                     required
                     value={newTask.due_date}
                     onChange={(e) =>
