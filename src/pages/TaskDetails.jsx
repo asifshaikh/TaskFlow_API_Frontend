@@ -152,7 +152,7 @@ const TaskDetails = () => {
             </div>
 
             <input
-              type="date"
+              type="datetime-local"
               className="w-full p-2 border rounded-md text-sm"
               value={formData.due_date}
               onChange={(e) =>
