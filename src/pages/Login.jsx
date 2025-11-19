@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import { useState } from 'react';
 import { Link, useNavigate, Navigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
@@ -17,6 +18,23 @@ const Login = () => {
   const [loading, setLoading] = useState(false); 
   const [showPassword, setShowPassword] = useState(false);
 
+=======
+import { useState } from "react";
+import { Link, useNavigate, Navigate } from "react-router-dom";
+import { useAuth } from "../contexts/AuthContext";
+import { authAPI } from "../services/api";
+
+const Login = () => {
+  const { user } = useAuth();
+  const { login } = useAuth();
+  const navigate = useNavigate();
+  const [formData, setFormData] = useState({
+    email: "",
+    password: "",
+  });
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+>>>>>>> b59e4678370ce7fcbe9d28be109d643b98f8e872
   if (user) {
     return <Navigate to="/dashboard" replace />;
   }

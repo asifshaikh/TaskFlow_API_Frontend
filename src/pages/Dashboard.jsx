@@ -3,6 +3,10 @@ import { useAuth } from "../contexts/AuthContext";
 import { tasksAPI } from "../services/api";
 import TaskCard from "../components/TaskCard";
 
+// AOS IMPORT
+import AOS from "aos";
+import "aos/dist/aos.css";
+
 const Dashboard = () => {
   const { user } = useAuth();
   const [tasks, setTasks] = useState([]);
@@ -18,6 +22,11 @@ const Dashboard = () => {
   const [endDate, setEndDate] = useState("");
   const [sortBy, setSortBy] = useState("");
 
+  // NEW AOS INIT
+  useEffect(() => {
+    AOS.init({ duration: 700, once: true, offset: 40 });
+  }, []);
+
   const [newTask, setNewTask] = useState({
     title: "",
     description: "",
@@ -30,7 +39,6 @@ const Dashboard = () => {
   const fetchStats = async () => {
     try {
       const statsData = await tasksAPI.getTaskStats();
-      console.log("Fetched stats data:", statsData);
       setStats(statsData);
     } catch (error) {
       console.error("Error fetching stats:", error);
@@ -40,54 +48,34 @@ const Dashboard = () => {
   const fetchTasks = async () => {
     setLoading(true);
     try {
-      const params = {
-        page,
-        per_page: 10,
-      };
+      const params = { page, per_page: 10 };
 
       if (statusFilter) params.status = statusFilter;
       if (priorityFilter) params.priority = priorityFilter;
       if (search) params.search = search;
 
       const response = await tasksAPI.getTasks(params);
-
       let tasks = response.data?.tasks;
 
-      // ---- FRONTEND DATE FILTERS ----
-      if (startDate) {
-        tasks = tasks.filter((t) => t.due_date && t.due_date >= startDate);
-      }
-      if (endDate) {
-        tasks = tasks.filter((t) => t.due_date && t.due_date <= endDate);
-      }
+      // Date Filter
+      if (startDate) tasks = tasks.filter((t) => t.due_date && t.due_date >= startDate);
+      if (endDate) tasks = tasks.filter((t) => t.due_date && t.due_date <= endDate);
 
-      // ---- SORTING ----
-      if (sortBy === "due_asc") {
-        tasks = [...tasks].sort(
-          (a, b) => new Date(a.due_date) - new Date(b.due_date)
-        );
-      }
-      if (sortBy === "due_desc") {
-        tasks = [...tasks].sort(
-          (a, b) => new Date(b.due_date) - new Date(a.due_date)
-        );
-      }
+      // Sorting
+      if (sortBy === "due_asc") tasks = [...tasks].sort((a, b) => new Date(a.due_date) - new Date(b.due_date));
+      if (sortBy === "due_desc") tasks = [...tasks].sort((a, b) => new Date(b.due_date) - new Date(a.due_date));
+
       if (sortBy === "priority_high_low") {
         const order = { HIGH: 3, MEDIUM: 2, LOW: 1 };
-        tasks = [...tasks].sort(
-          (a, b) => order[b.priority] - order[a.priority]
-        );
+        tasks = [...tasks].sort((a, b) => order[b.priority] - order[a.priority]);
       }
+
       if (sortBy === "priority_low_high") {
         const order = { HIGH: 3, MEDIUM: 2, LOW: 1 };
-        tasks = [...tasks].sort(
-          (a, b) => order[a.priority] - order[b.priority]
-        );
+        tasks = [...tasks].sort((a, b) => order[a.priority] - order[b.priority]);
       }
 
       setTasks(tasks);
-      console.log(response.data);
-
       setTotalPages(response.data.total_pages || 1);
     } catch (error) {
       console.error("Error fetching tasks:", error);
@@ -95,6 +83,7 @@ const Dashboard = () => {
       setLoading(false);
     }
   };
+
   useEffect(() => {
     fetchTasks();
   }, [page, statusFilter, priorityFilter, startDate, endDate, sortBy, search]);
@@ -107,7 +96,6 @@ const Dashboard = () => {
     const delay = setTimeout(() => {
       setPage(1);
     }, 500);
-
     return () => clearTimeout(delay);
   }, [search]);
 
@@ -140,6 +128,7 @@ const Dashboard = () => {
         due_date: "",
         images: null,
       });
+
       fetchTasks();
       fetchStats();
     } catch (error) {
@@ -167,10 +156,14 @@ const Dashboard = () => {
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-8 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
+
         {/* Welcome Section */}
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-2 flex items-center gap-2">
-            {getGreeting()}, {user?.name || "User"}!
+        <div className="mb-8" data-aos="fade-up">
+          <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+            {getGreeting()},{" "}
+            <span className="bg-gradient-to-r from-blue-500 to-purple-600 bg-clip-text text-transparent inline-block leading-tight">
+              {user?.name || "User"}
+            </span>
             <span className="wave-emoji">👋</span>
           </h1>
 
@@ -181,7 +174,11 @@ const Dashboard = () => {
 
         {/* Stats Cards */}
         {stats && (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
+          <div
+            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-8"
+            data-aos="fade-up"
+            data-aos-delay="150"
+          >
             <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 hover:shadow-xl hover:-translate-y-1 transition-all">
               <div className="text-sm text-gray-600 dark:text-gray-400 mb-1">
                 Total Tasks
@@ -221,7 +218,11 @@ const Dashboard = () => {
         )}
 
         {/* Filters */}
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 mb-8 border border-gray-200 dark:border-gray-700">
+        <div
+          className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 mb-8 border border-gray-200 dark:border-gray-700"
+          data-aos="fade-up"
+          data-aos-delay="250"
+        >
           <div className="flex flex-col md:flex-row gap-4 items-center">
             <div className="flex-1 w-full">
               <input
@@ -276,40 +277,37 @@ const Dashboard = () => {
             />
 
             <div className="relative inline-block group">
-              {/* Rotating Border ON HOVER */}
               <div
                 className="
-      absolute inset-0 rounded-lg p-[2px] pointer-events-none 
-      opacity-0 group-hover:opacity-100 
-      transition-opacity duration-300
-    "
+                  absolute inset-0 rounded-lg p-[2px] pointer-events-none
+                  opacity-0 group-hover:opacity-100
+                  transition-opacity duration-300
+                "
               >
                 <div
                   className="
-        absolute inset-0 rounded-lg 
-        bg-[conic-gradient(from_0deg,#a855f7,#3b82f6,#9333ea,#a855f7)]
-        animate-none group-hover:animate-spin-border
-      "
+                    absolute inset-0 rounded-lg 
+                    bg-[conic-gradient(from_0deg,#a855f7,#3b82f6,#9333ea,#a855f7)]
+                    animate-none group-hover:animate-spin-border
+                  "
                 ></div>
               </div>
 
-              {/* Background layer so spinning border doesn't cover select */}
               <div className="absolute inset-[3px] bg-white dark:bg-gray-700 rounded-lg pointer-events-none"></div>
 
-              {/* SELECT */}
               <select
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value)}
                 className="
-      relative z-10 px-4 py-2 w-full rounded-lg 
-      bg-transparent dark:text-white text-gray-900
-       dark:bg-gray-700
-      border border-gray-300 dark:border-gray-600
-      hover:scale-[1.02] hover:shadow-md
-      transition-all duration-200
-      focus:ring-2 focus:ring-purple-500 focus:border-purple-500
-      cursor-pointer
-    "
+                  relative z-10 px-4 py-2 w-full rounded-lg
+                  bg-transparent dark:text-white text-gray-900
+                  dark:bg-gray-700
+                  border border-gray-300 dark:border-gray-600
+                  hover:scale-[1.02] hover:shadow-md
+                  transition-all duration-200
+                  focus:ring-2 focus:ring-purple-500 focus:border-purple-500
+                  cursor-pointer
+                "
               >
                 <option value="">Sort</option>
                 <option value="due_asc">Due Date ↑</option>
@@ -324,7 +322,7 @@ const Dashboard = () => {
               className="group px-6 py-2 bg-gradient-to-r from-blue-500 to-purple-600 text-white 
                           rounded-lg font-medium hover:scale-105 transition-all flex items-center gap-2"
             >
-              <span className="inline-block transition-transform duration-600 group-hover:rotate-2880">
+              <span className="inline-block transition-transform duration-900 group-hover:rotate-2880">
                 +
               </span>
               Create Task
@@ -332,16 +330,17 @@ const Dashboard = () => {
           </div>
         </div>
 
-        {/* Task List with Hover + Fade Animation */}
+        {/* Task List Section */}
         {loading ? (
-          <div className="text-center py-12">
+          <div className="text-center py-12" data-aos="fade-up">
             <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
-            <p className="mt-4 text-gray-600 dark:text-gray-400">
-              Loading tasks...
-            </p>
+            <p className="mt-4 text-gray-600 dark:text-gray-400">Loading tasks...</p>
           </div>
         ) : tasks.length === 0 ? (
-          <div className="text-center py-12 bg-white dark:bg-gray-800 rounded-lg shadow-md border border-gray-200 dark:border-gray-700">
+          <div
+            className="text-center py-12 bg-white dark:bg-gray-800 rounded-lg shadow-md border border-gray-200 dark:border-gray-700"
+            data-aos="fade-up"
+          >
             <h3 className="mt-2 text-sm font-medium text-gray-900 dark:text-white">
               No tasks found
             </h3>
@@ -351,10 +350,13 @@ const Dashboard = () => {
           </div>
         ) : (
           <>
-            <div className="flex flex-col gap-6 mb-8">
-              {tasks.map((task) => (
+            {/* Task List */}
+            <div className="flex flex-col gap-6 mb-8" data-aos="fade-up" data-aos-delay="200">
+              {tasks.map((task, index) => (
                 <div
                   key={task.task_id ?? task.id}
+                  data-aos="fade-up"
+                  data-aos-delay={index * 80}
                   className="transform transition-all duration-200 hover:scale-[1.02] hover:shadow-lg bg-transparent rounded-xl"
                 >
                   <TaskCard task={task} refreshStats={fetchStats} />
@@ -362,43 +364,33 @@ const Dashboard = () => {
               ))}
             </div>
 
+            {/* Pagination */}
             {totalPages > 1 && (
-              <div className="flex justify-center items-center space-x-2">
-                {/* Previous Button */}
+              <div className="flex justify-center items-center space-x-2" data-aos="fade-up">
                 <button
                   onClick={() => setPage((p) => Math.max(1, p - 1))}
                   disabled={page === 1}
-                  className={`
-        relative px-7 py-2 rounded-lg text-white font-medium
-        transition-all duration-300
-        ${
-          page === 1
-            ? "bg-gray-300 dark:bg-gray-800 text-gray-700 dark:text-gray-300 shadow-md cursor-not-allowed opacity-50"
-            : "bg-gradient-to-r from-blue-500 to-purple-600 shadow-md hover:shadow-lg hover:from-purple-500 hover:to-blue-600 transform hover:scale-[1.05]"
-        }
-      `}
+                  className={`relative px-7 py-2 rounded-lg text-white font-medium transition-all duration-300 ${
+                    page === 1
+                      ? "bg-gray-300 dark:bg-gray-800 text-gray-700 dark:text-gray-300 shadow-md cursor-not-allowed opacity-50"
+                      : "bg-gradient-to-r from-blue-500 to-purple-600 shadow-md hover:shadow-lg hover:from-purple-500 hover:to-blue-600 transform hover:scale-[1.05]"
+                  }`}
                 >
                   Previous
                 </button>
 
-                {/* Page Info */}
                 <span className="px-4 py-2 text-gray-700 dark:text-gray-300">
                   Page {page} of {totalPages}
                 </span>
 
-                {/* Next Button */}
                 <button
                   onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
                   disabled={page === totalPages}
-                  className={`
-        relative px-7 py-2 rounded-lg text-white font-medium
-        transition-all duration-500
-        ${
-          page === totalPages
-            ? "bg-gray-300 dark:bg-gray-800 text-gray-700 dark:text-gray-300 shadow-md cursor-not-allowed opacity-50"
-            : "bg-gradient-to-r from-blue-500 to-purple-600 shadow-md hover:shadow-lg hover:from-purple-500 hover:to-blue-600 transform hover:scale-[1.05]"
-        }
-      `}
+                  className={`relative px-7 py-2 rounded-lg text-white font-medium transition-all duration-500 ${
+                    page === totalPages
+                      ? "bg-gray-300 dark:bg-gray-800 text-gray-700 dark:text-gray-300 shadow-md cursor-not-allowed opacity-50"
+                      : "bg-gradient-to-r from-blue-500 to-purple-600 shadow-md hover:shadow-lg hover:from-purple-500 hover:to-blue-600 transform hover:scale-[1.05]"
+                  }`}
                 >
                   Next
                 </button>
@@ -517,6 +509,7 @@ const Dashboard = () => {
             </div>
           </div>
         )}
+
       </div>
     </div>
   );
